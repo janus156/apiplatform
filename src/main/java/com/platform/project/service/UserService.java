@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 用户服务
  *
- * @author platform
  */
 public interface UserService extends IService<User> {
 

@@ -8,7 +8,6 @@ import com.platform.project.common.DeleteRequest;
 import com.platform.project.common.ErrorCode;
 import com.platform.project.common.ResultUtils;
 import com.platform.project.exception.BusinessException;
-import com.platform.project.model.dto.*;
 import com.platform.project.model.dto.user.*;
 import com.platform.project.model.entity.User;
 import com.platform.project.model.vo.UserVO;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 /**
  * 用户接口
  *
- * @author platform
  */
 @RestController
 @RequestMapping("/user")

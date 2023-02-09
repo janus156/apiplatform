@@ -10,12 +10,10 @@ import com.platform.project.common.ResultUtils;
 import com.platform.project.constant.CommonConstant;
 import com.platform.project.exception.BusinessException;
 import com.platform.project.model.dto.post.PostAddRequest;
-import com.platform.project.model.dto.post.PostDoThumbRequest;
 import com.platform.project.model.dto.post.PostQueryRequest;
 import com.platform.project.model.dto.post.PostUpdateRequest;
 import com.platform.project.model.entity.Post;
 import com.platform.project.model.entity.User;
-import com.platform.project.model.vo.PostVO;
 import com.platform.project.service.PostService;
 import com.platform.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 /**
  * 帖子接口
