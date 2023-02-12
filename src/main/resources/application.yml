@@ -25,5 +25,5 @@ mybatis-plus:
       logic-not-delete-value: 0
 plat:
   client:
-    access-key: 123
-    secret-key: 123
+    access-key:
+    secret-key:

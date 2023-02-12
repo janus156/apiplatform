@@ -1,14 +1,17 @@
 package com.platform.project.controller;
 
 import clientsdk.client.PlatClient;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
+import com.google.gson.Gson;
 import com.platform.project.annotation.AuthCheck;
 import com.platform.project.common.*;
 import com.platform.project.constant.CommonConstant;
 import com.platform.project.exception.BusinessException;
 import com.platform.project.model.dto.interfaceinfo.InterfaceInfoAddRequest;
+import com.platform.project.model.dto.interfaceinfo.InterfaceInfoInvokeRequest;
 import com.platform.project.model.dto.interfaceinfo.InterfaceInfoQueryRequest;
 import com.platform.project.model.dto.interfaceinfo.InterfaceInfoUpdateRequest;
 import com.platform.project.model.entity.InterfaceInfo;
@@ -17,6 +20,7 @@ import com.platform.project.model.enums.InterfaceInfoStatusEnum;
 import com.platform.project.service.InterfaceInfoService;
 import com.platform.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import nonapi.io.github.classgraph.json.JSONUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -271,5 +275,33 @@ public class InterfaceInfoController {
         return ResultUtils.success(update);
     }
 
+
+    @PostMapping("/invoke")
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                    HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = interfaceInfoInvokeRequest.getId();
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        //创建客户端
+        PlatClient platClient=new PlatClient(accessKey,secretKey);
+        //调用获取用户名接口
+        clientsdk.model.User user = JSONUtil.toBean(userRequestParams, clientsdk.model.User.class);
+        String username = platClient.getUsernameByPost(user);
+
+        return ResultUtils.success(username);
+    }
 
 }
