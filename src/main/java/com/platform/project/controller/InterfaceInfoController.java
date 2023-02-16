@@ -298,6 +298,7 @@ public class InterfaceInfoController {
         //创建客户端
         PlatClient platClient=new PlatClient(accessKey,secretKey);
         //调用获取用户名接口
+        //接口，包含acess key 、secret key
         clientsdk.model.User user = JSONUtil.toBean(userRequestParams, clientsdk.model.User.class);
         String username = platClient.getUsernameByPost(user);
 
