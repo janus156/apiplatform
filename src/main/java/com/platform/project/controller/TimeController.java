@@ -18,4 +18,5 @@ public class TimeController {
     public String getNameByPostRestful(@RequestBody User user, HttpServletRequest request){
         return user+":"+LocalDateTime.now().toString();
     }
+
 }
