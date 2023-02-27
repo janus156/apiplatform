@@ -36,7 +36,7 @@ public class DemoServiceImpl implements DemoService {
 
     @Override
     public String sayHello2(String name) {
-        return "hahaha";
+        return "你好啊";
     }
 
     @Override
