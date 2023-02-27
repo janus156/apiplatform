@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class TimeController {
 
     @PostMapping("/user")
-    public String getNameByPostRestful(@RequestBody User user, HttpServletRequest request){
+    public String getTimeByPostRestful(@RequestBody User user, HttpServletRequest request){
         return user+":"+LocalDateTime.now().toString();
     }
 
