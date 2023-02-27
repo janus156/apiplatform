@@ -305,4 +305,63 @@ public class InterfaceInfoController {
         return ResultUtils.success(username);
     }
 
+
+    @PostMapping("/invokeHello")
+    public BaseResponse<Object> invokeHelloInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                    HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = interfaceInfoInvokeRequest.getId();
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        //创建客户端
+        PlatClient platClient=new PlatClient(accessKey,secretKey);
+        //调用获取用户名接口
+        //接口，包含acess key 、secret key
+        clientsdk.model.User user = JSONUtil.toBean(userRequestParams, clientsdk.model.User.class);
+        String username = platClient.sayHello(user);
+
+        return ResultUtils.success(username);
+    }
+
+
+    @PostMapping("/invokeTime")
+    public BaseResponse<Object> invokeTimeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest,
+                                                    HttpServletRequest request) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        long id = interfaceInfoInvokeRequest.getId();
+        String userRequestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        // 判断是否存在
+        InterfaceInfo oldInterfaceInfo = interfaceInfoService.getById(id);
+        if (oldInterfaceInfo == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (oldInterfaceInfo.getStatus() == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已关闭");
+        }
+        User loginUser = userService.getLoginUser(request);
+        String accessKey = loginUser.getAccessKey();
+        String secretKey = loginUser.getSecretKey();
+        //创建客户端
+        PlatClient platClient=new PlatClient(accessKey,secretKey);
+        //调用获取用户名接口
+        //接口，包含acess key 、secret key
+        clientsdk.model.User user = JSONUtil.toBean(userRequestParams, clientsdk.model.User.class);
+        String username = platClient.getTime(user);
+
+        return ResultUtils.success(username);
+    }
 }
