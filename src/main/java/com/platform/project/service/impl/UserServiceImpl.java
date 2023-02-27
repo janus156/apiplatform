@@ -1,6 +1,10 @@
 package com.platform.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,12 +15,20 @@ import com.platform.project.model.entity.User;
 import com.platform.project.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import static com.platform.project.common.RedisConstants.LOGIN_USER_KEY;
+import static com.platform.project.common.RedisConstants.LOGIN_USER_TTL;
 import static com.platform.project.constant.UserConstant.ADMIN_ROLE;
 import static com.platform.project.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -29,6 +41,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
 
     /**
      * 盐值，混淆密码
@@ -103,9 +118,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             log.info("user login failed, userAccount cannot match userPassword");
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
+        String token = UUID.randomUUID().toString(true);
+        String tokenKey=LOGIN_USER_KEY + token;
+        Map<String, Object> userMap = BeanUtil.beanToMap(User.class, new HashMap<>(),
+                CopyOptions.create()
+                        .setIgnoreNullValue(true)
+                        //将值全部转为string类型
+                        .setFieldValueEditor((filedName, fieldValue) -> fieldValue.toString())
+        );
+        //存储user到redis
+        redisTemplate.opsForHash().putAll(tokenKey, userMap);
+        redisTemplate.expire(tokenKey, LOGIN_USER_TTL, TimeUnit.MINUTES);
         // 3. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
         return user;
+
     }
 
     /**
@@ -122,6 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (currentUser == null || currentUser.getId() == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
+
         // 从数据库查询（追求性能的话可以注释，直接走缓存）
         long userId = currentUser.getId();
         currentUser = this.getById(userId);
