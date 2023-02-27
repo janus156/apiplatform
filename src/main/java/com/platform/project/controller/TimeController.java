@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 
 @RestController
-@RequestMapping("/name")
+@RequestMapping("/time")
 public class TimeController {
 
     @PostMapping("/user")
